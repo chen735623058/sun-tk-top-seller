@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikTok Shop Pet Title Optimizer - TK美区宠物标题优化工具</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        .header p {
+            opacity: 0.9;
+            font-size: 1.05em;
+        }
+        .content {
+            padding: 30px;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        .section h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.4em;
+            border-bottom: 2px solid #4facfe;
+            padding-bottom: 10px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+        }
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: #4facfe;
+        }
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            font-size: 1.1em;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        .btn-secondary {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            margin-left: 10px;
+        }
+        .result-box {
+            margin-top: 20px;
+        }
+        .title-item {
+            background: white;
+            padding: 15px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+            border-left: 5px solid #4facfe;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .title-type {
+            font-size: 0.85em;
+            color: #667eea;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        .title-text {
+            font-size: 1em;
+            word-break: break-all;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 8px 0;
+            position: relative;
+        }
+        .title-length {
+            font-size: 0.8em;
+            color: #999;
+            text-align: right;
+        }
+        .copy-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 4px 10px;
+            font-size: 0.8em;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .copy-btn:hover {
+            background: #5568d3;
+        }
+        .keywords-stats {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .keyword-tag {
+            background: #e3f2fd;
+            color: #1976d2;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+        .category-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .category-box {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e1e5e9;
+        }
+        .category-box h3 {
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 1em;
+        }
+        .keyword-list {
+            max-height: 150px;
+            overflow-y: auto;
+        }
+        .keyword-item {
+            display: inline-block;
+            background: #f0f0f0;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            margin: 2px;
+        }
+        .add-keyword-form {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        .add-keyword-form input {
+            flex: 1;
+            min-width: 200px;
+        }
+        .count-info {
+            text-align: right;
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+        .loading {
+            text-align: center;
+            padding: 30px;
+            color: #667eea;
+            font-size: 1.2em;
+        }
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #333;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 8px;
+            display: none;
+            animation: slideIn 0.3s;
+            z-index: 1000;
+        }
+        .toast.show {
+            display: block;
+        }
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+            }
+            to {
+                transform: translateX(0);
+            }
+        }
+        @media (max-width: 768px) {
+            .content {
+                padding: 15px;
+            }
+            .header h1 {
+                font-size: 1.5em;
+            }
+            .add-keyword-form {
+                flex-direction: column;
+            }
+            button {
+                width: 100%;
+                margin: 5px 0;
+            }
+            .btn-secondary {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🐾 TikTok Shop Pet Title Optimizer</h1>
+            <p>TK美区宠物用品标题智能优化工具 - 2026最新热门关键词</p>
+        </div>
+        <div class="content">
+            <!-- 标题生成区域 -->
+            <div class="section">
+                <h2>✨ 生成优化标题</h2>
+                <div class="form-group">
+                    <label for="product">商品名称 (Product Name)</label>
+                    <input type="text" id="product" placeholder="e.g. Automatic Cat Litter Box">
+                </div>
+                <div class="form-group">
+                    <label for="description">商品描述 (Description - Optional)</label>
+                    <textarea id="description" placeholder="Add more details about your product, like features, size, material..."></textarea>
+                </div>
+                <button onclick="generateTitles()">生成优化标题 Generate Titles</button>
+                <button class="btn-secondary" onclick="clearForm()">清空 Clear</button>
+            </div>
+
+            <!-- 结果区域 -->
+            <div class="section" id="result-section" style="display: none;">
+                <h2>🎯 匹配到的关键词</h2>
+                <div id="matched-keywords" class="keywords-stats"></div>
+                <h2 style="margin-top: 20px;">📝 优化后的标题</h2>
+                <div id="result-titles" class="result-box"></div>
+            </div>
+
+            <!-- 关键词库管理区域 -->
+            <div class="section">
+                <h2>📚 关键词库管理 (Keywords Library)</h2>
+                <div id="keywords-count" class="count-info"></div>
+                <div id="categories-container" class="category-container">
+                    <!-- 动态加载 -->
+                </div>
+                <h3 style="margin-top: 20px;">➕ 添加新关键词</h3>
+                <div class="add-keyword-form">
+                    <select id="new-keyword-category">
+                        <option value="cat">猫咪用品 Cat Products</option>
+                        <option value="dog">狗狗用品 Dog Products</option>
+                        <option value="cleaning">清洁护理 Cleaning</option>
+                        <option value="travel_home">居家出行 Travel & Home</option>
+                        <option value="nutrition">零食营养 Nutrition</option>
+                        <option value="smart">智能设备 Smart Tech</option>
+                        <option value="other">其他宠物 Other Pets</option>
+                        <option value="marketing">营销词 Marketing</option>
+                    </select>
+                    <input type="text" id="new-keyword" placeholder="Enter new keyword...">
+                    <button onclick="addKeyword()">Add</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // 关键词库 - 2026美区最新热门关键词
+        let keywordsData = {
+            "cat": [
+                "cat litter", "clumping cat litter", "unscented cat litter", "scented cat litter", 
+                "dust free cat litter", "low dust cat litter", "lightweight cat litter", "crystal cat litter",
+                "tofu cat litter", "bentonite cat litter", "wood pellet cat litter", "self cleaning litter box",
+                "automatic cat litter box", "smart cat litter box", "enclosed cat litter box", "top entry litter box",
+                "open litter box", "disposable litter box", "cat litter mat", "cat litter scoop",
+                "litter box liner", "cat scratching post", "cardboard cat scratcher", "cat scratching board",
+                "corrugated cat scratcher", "sisal cat scratcher", "cat tree", "cat tower", "cat condo",
+                "cat window perch", "cat bed", "heated cat bed", "outdoor cat house", "heated outdoor cat house",
+                "enclosed cat bed", "cave cat bed", "cat water fountain", "automatic cat water fountain",
+                "filtered cat fountain", "automatic cat feeder", "wifi cat feeder", "app controlled cat feeder",
+                "timed cat feeder", "ceramic cat bowl", "stainless steel cat bowl", "elevated cat bowl",
+                "slow feeder cat bowl", "pet food storage container", "airtight pet food container",
+                "cat toys", "interactive cat toys", "feather wand cat toy", "laser pointer cat toy",
+                "catnip toys", "silvervine toys", "crinkle cat toys", "catnip", "silvervine",
+                "cat treats", "freeze dried cat treats", "dental cat treats", "soft cat treats",
+                "crunchy cat treats", "kitten food", "adult cat food", "senior cat food",
+                "grain free cat food", "gluten free cat food", "dry cat food", "wet cat food",
+                "canned cat food", "pouch cat food", "raw cat food", "freeze dried cat food",
+                "hairball remedy", "hairball control", "cat brush", "deshedding tool for cats",
+                "slicker brush cat", "cat comb", "furminator for cats", "cat nail clippers",
+                "cat nail grinder", "cat flea treatment", "topical flea prevention", "oral flea treatment",
+                "cat flea collar", "cat odor eliminator", "pet urine enzyme cleaner", "cat litter deodorizer",
+                "cat wipes", "grooming wipes for cats", "antibacterial cat wipes", "disposable cat pads",
+                "puppy pads for cats", "cat carrier", "soft sided cat carrier", "hard shell cat carrier",
+                "cat backpack carrier", "airline approved cat carrier"
+            ],
+            "dog": [
+                "dog leash", "retractable dog leash", "heavy duty dog leash", "hands free dog leash",
+                "dog harness", "no pull dog harness", "front clip harness", "back clip harness",
+                "step in harness", "service dog harness", "dog collar", "personalized dog collar",
+                "leather dog collar", "nylon dog collar", "martingale collar", "reflective dog collar",
+                "LED dog collar", "dog crate", "metal dog crate", "plastic dog crate", "foldable dog crate",
+                "soft sided dog crate", "dog bed", "orthopedic dog bed", "waterproof dog bed",
+                "memory foam dog bed", "elevated dog bed", "cooling dog bed", "heated dog bed",
+                "washable dog bed", "dog kennel", "outdoor dog kennel", "dog playpen", "indoor dog playpen",
+                "puppy playpen", "dog potty", "grass pad dog potty", "artificial grass potty",
+                "indoor dog potty", "dog bowl", "stainless steel dog bowl", "ceramic dog bowl",
+                "slow feeder dog bowl", "elevated dog bowl", "no spill dog bowl", "automatic dog feeder",
+                "wifi dog feeder", "app controlled feeder", "timed dog feeder", "dog water fountain",
+                "automatic water fountain", "filtered dog fountain", "dog food container", "airtight dog food storage",
+                "dog food", "dry dog food", "wet dog food", "grain free dog food", "puppy food",
+                "adult dog food", "senior dog food", "large breed dog food", "small breed dog food",
+                "raw dog food", "freeze dried dog food", "limited ingredient dog food", "dog treats",
+                "peanut butter dog treats", "sweet potato dog treats", "chicken jerky dog treats",
+                "dog biscuits", "dental chews for dogs", "rawhide chews", "bully sticks",
+                "yak cheese dog chews", "frozen dog treats", "dog toys", "interactive dog toys",
+                "chew toys for dogs", "rubber chew toys", "squeaky dog toys", "plush dog toys",
+                "frisbee for dogs", "flying disc", "dog toys for aggressive chewers", "indestructible dog toys",
+                "dog bones", "stuffed bones", "marrow bones", "dog grooming brush", "shedding brush for dogs",
+                "slicker brush dog", "undercoat rake", "furminator for dogs", "deshedding tool",
+                "dog nail clippers", "dog nail grinder", "dog shampoo", "oatmeal dog shampoo", "hypoallergenic dog shampoo"
+            ],
+            "cleaning": [
+                "deodorizing shampoo", "medicated dog shampoo", "dog conditioner", "dry shampoo for dogs",
+                "dog paw cleaner", "dog toothbrush", "dog toothpaste", "finger toothbrush", "dog dental chew",
+                "dog breath freshener", "dog hair dryer", "pet grooming clipper", "dog clippers for grooming",
+                "cordless dog clippers", "dog lint roller", "pet hair remover", "pet hair roller",
+                "flea and tick prevention for dogs", "flea and tick collar", "flea spray for home",
+                "tick remover tool", "pet laundry detergent", "pet safe disinfectant", "pet odor eliminator spray",
+                "stain and odor remover", "enzymatic cleaner for dog urine", "pet grooming wipes",
+                "dog paw wipes", "antibacterial dog wipes"
+            ],
+            "travel_home": [
+                "dog door", "electronic dog door", "automatic dog door", "baby gate for pets", "pet gate",
+                "pressure mounted pet gate", "retractable pet gate", "dog car seat cover", "dog cargo liner",
+                "dog car seat", "dog seat belt", "dog ramp for bed", "dog stairs for high beds",
+                "pet travel crate", "airline approved dog crate", "pet stroller", "dog stroller",
+                "cat stroller", "dog carrier", "soft sided dog carrier", "hard shell dog carrier",
+                "dog sling carrier"
+            ],
+            "nutrition": [
+                "freeze-dried pet treats", "raw freeze-dried dog food", "salmon treats for dogs",
+                "bone broth for dogs", "fish oil omega 3 for dogs", "glucosamine chondroitin for dogs",
+                "probiotics for dogs", "dog multivitamin", "puppy milk replacer", "calming treats for dogs",
+                "dog anxiety relief", "cbd treats for dogs", "hemp calming treats", "joint supplements for dogs",
+                "skin and coat supplements", "digestive supplements"
+            ],
+            "smart": [
+                "pet camera with treat dispenser", "dog camera", "cat camera", "night vision pet camera",
+                "wifi pet camera", "gps dog tracker", "dog activity monitor", "cat gps tracker",
+                "automatic laser toy", "interactive cat laser"
+            ],
+            "other": [
+                "hamster cage", "hamster bedding", "hamster food", "rabbit cage", "rabbit hay",
+                "guinea pig cage", "guinea pig bedding", "guinea pig food", "parrot cage", "bird cage",
+                "bird food", "parrot toys", "aquarium fish tank", "reptile tank", "reptile habitat",
+                "terrarium", "turtle tank", "turtle food"
+            ],
+            "marketing": [
+                "premium", "durable", "easy to clean", "non toxic", "high quality", "new 2026",
+                "hot sale", "popular", "best seller", "for small dogs", "for large dogs",
+                "for indoor cats", "for multiple cats", "beginner friendly", "pet owner must have"
+            ]
+        };
+
+        // 页面加载
+        document.addEventListener('DOMContentLoaded', function() {
+            // 尝试从localStorage加载
+            const saved = localStorage.getItem('tkKeywords');
+            if (saved) {
+                try {
+                    keywordsData = JSON.parse(saved);
+                } catch(e) {
+                    console.log('Using default keywords');
+                }
+            }
+            displayKeywords(keywordsData);
+            updateCount();
+        });
+
+        function saveKeywords() {
+            localStorage.setItem('tkKeywords', JSON.stringify(keywordsData));
+        }
+
+        function displayKeywords(data) {
+            const container = document.getElementById('categories-container');
+            container.innerHTML = '';
+            
+            const categoryNames = {
+                cat: '🐱 猫咪用品',
+                dog: '🐶 狗狗用品',
+                cleaning: '🧼 清洁护理',
+                travel_home: '🏠 居家出行',
+                nutrition: '🦴 零食营养',
+                smart: '🤖 智能设备',
+                other: "🐹 其他宠物",
+                marketing: "🔥 营销词"
+            };
+
+            for (let category in data) {
+                const box = document.createElement('div');
+                box.className = 'category-box';
+                box.innerHTML = `
+                    <h3>${categoryNames[category] || category} (${data[category].length})</h3>
+                    <div class="keyword-list">
+                        ${data[category].map(kw => `<span class="keyword-item">${kw}</span>`).join('')}
+                    </div>
+                `;
+                container.appendChild(box);
+            }
+        }
+
+        function updateCount() {
+            let total = 0;
+            for (let cat in keywordsData) {
+                total += keywordsData[cat].length;
+            }
+            document.getElementById('keywords-count').textContent = `Total keywords: ${total}`;
+        }
+
+        function addKeyword() {
+            const category = document.getElementById('new-keyword-category').value;
+            const keyword = document.getElementById('new-keyword').value.trim();
+            
+            if (!keyword) {
+                showToast('Please enter a keyword');
+                return;
+            }
+
+            if (!keywordsData[category]) {
+                keywordsData[category] = [];
+            }
+
+            if (keywordsData[category].indexOf(keyword) === -1) {
+                keywordsData[category].push(keyword);
+                saveKeywords();
+                showToast('Keyword added successfully!');
+                document.getElementById('new-keyword').value = '';
+                displayKeywords(keywordsData);
+                updateCount();
+            } else {
+                showToast('Keyword already exists');
+            }
+        }
+
+        function generateTitles() {
+            const product = document.getElementById('product').value.trim().toLowerCase();
+            const description = document.getElementById('description').value.trim().toLowerCase();
+            
+            if (!product) {
+                showToast('Please enter product name');
+                return;
+            }
+
+            // 收集匹配的关键词
+            let matched = [];
+            
+            // 遍历所有分类找匹配
+            for (let category in keywordsData) {
+                keywordsData[category].forEach(kw => {
+                    const kwLower = kw.toLowerCase();
+                    if (kwLower.includes(product) || product.includes(kwLower) || 
+                        (description && kwLower.includes(description)) || 
+                        (description && description.includes(kwLower)) ||
+                        product.split(' ').some(word => kwLower.includes(word))) {
+                        if (matched.indexOf(kw) === -1) {
+                            matched.push(kw);
+                        }
+                    }
+                });
+            }
+            
+            // 加上营销词
+            const marketing = keywordsData.marketing || [];
+            
+            // 生成5个不同标题
+            const titles = generateMultipleTitles(product, matched, marketing);
+            
+            displayResult(matched, titles);
+        }
+
+        function generateMultipleTitles(product, matchedKeywords, marketingWords) {
+            // 生成不同风格的标题
+            // 1. 基础款 - 核心关键词前置
+            // 2. 长尾精准款1
+            // 3. 长尾精准款2
+            // 4. 营销吸引款1
+            // 5. 营销吸引款2
+            
+            const randomSample = (array, count) => {
+                const shuffled = [...array].sort(() => 0.5 - Math.random());
+                return shuffled.slice(0, count);
+            };
+
+            const titles = [];
+            
+            // 核心产品词大写开头
+            const productClean = product.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+            
+            // 1. 基础款
+            let core = matchedKeywords.slice(0, 5).filter(kw => kw.toLowerCase() !== product.toLowerCase());
+            if (!core.some(kw => kw.toLowerCase() === product.toLowerCase())) {
+                core.unshift(productClean);
+            } else {
+                core = [productClean, ...core];
+            }
+            const title1 = core.slice(0, 6).join(' - ');
+            titles.push({
+                type: "基础标准款",
+                title: title1,
+                length: title1.length
+            });
+            
+            // 2. 长尾精准款1
+            if (matchedKeywords.length > 5) {
+                let sample1 = randomSample(matchedKeywords, Math.min(8, matchedKeywords.length));
+                if (!sample1.some(kw => kw.toLowerCase() === product.toLowerCase())) {
+                    sample1.unshift(productClean);
+                } else {
+                    sample1 = [productClean, ...sample1.filter(kw => kw.toLowerCase() !== product.toLowerCase())];
+                }
+                const title2 = sample1.slice(0, 7).join(', ');
+                titles.push({
+                    type: "长尾精准款",
+                    title: title2,
+                    length: title2.length
+                });
+            }
+            
+            // 3. 长尾精准款2
+            if (matchedKeywords.length > 8) {
+                let sample2 = randomSample(matchedKeywords, Math.min(10, matchedKeywords.length));
+                if (!sample2.some(kw => kw.toLowerCase() === product.toLowerCase())) {
+                    sample2.unshift(productClean);
+                } else {
+                    sample2 = [productClean, ...sample2.filter(kw => kw.toLowerCase() !== product.toLowerCase())];
+                }
+                // 加一个营销词
+                if (marketingWords.length > 0) {
+                    const mark = randomSample(marketingWords, 1)[0];
+                    sample2.push(mark);
+                }
+                const title3 = sample2.slice(0, 8).join(' | ');
+                titles.push({
+                    type: "长尾精准款",
+                    title: title3,
+                    length: title3.length
+                });
+            }
+            
+            // 4. 营销吸引款1
+            if (marketingWords.length > 0) {
+                const marketingSample = randomSample(marketingWords, Math.min(2, marketingWords.length));
+                const marketingText = marketingSample.map(m => m.charAt(0).toUpperCase() + m.slice(1)).join(' ');
+                let matchedMarketing = matchedKeywords.filter(kw => kw.toLowerCase() !== product.toLowerCase()).slice(0, 5);
+                const title4 = `${marketingText} ${productClean}${matchedMarketing.length > 0 ? ' - ' + matchedMarketing.join(' - ') : ''}`;
+                titles.push({
+                    type: "营销吸引款",
+                    title: title4,
+                    length: title4.length
+                });
+            }
+            
+            // 5. 营销吸引款2
+            if (matchedKeywords.length > 5) {
+                let allWords = [productClean, ...matchedKeywords.slice(0, 6)];
+                if (marketingWords.length > 0) {
+                    allWords.push(randomSample(marketingWords, 1)[0]);
+                }
+                const title5 = allWords.join(' ');
+                titles.push({
+                    type: "营销吸引款",
+                    title: title5,
+                    length: title5.length
+                });
+            }
+            
+            return titles;
+        }
+
+        function displayResult(matched, titles) {
+            const section = document.getElementById('result-section');
+            section.style.display = 'block';
+            
+            // 显示匹配的关键词
+            const matchedDiv = document.getElementById('matched-keywords');
+            matchedDiv.innerHTML = matched.map(kw => `<span class="keyword-tag">${kw}</span>`).join('');
+            
+            // 显示标题
+            const titlesDiv = document.getElementById('result-titles');
+            titlesDiv.innerHTML = '';
+            
+            titles.forEach((item, index) => {
+                const titleItem = document.createElement('div');
+                titleItem.className = 'title-item';
+                titleItem.innerHTML = `
+                    <div class="title-type">${item.type} (${item.length} chars)</div>
+                    <div class="title-text">
+                        ${item.title}
+                        <button class="copy-btn" onclick="copyTitle('${encodeURIComponent(item.title)}')">Copy</button>
+                    </div>
+                `;
+                titlesDiv.appendChild(titleItem);
+            });
+
+            // 滚动到结果
+            section.scrollIntoView({behavior: 'smooth'});
+        }
+
+        function copyTitle(title) {
+            const decoded = decodeURIComponent(title);
+            navigator.clipboard.writeText(decoded).then(() => {
+                showToast('Title copied to clipboard!');
+            });
+        }
+
+        function clearForm() {
+            document.getElementById('product').value = '';
+            document.getElementById('description').value = '';
+            document.getElementById('result-section').style.display = 'none';
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+    </script>
+</body>
+</html>
