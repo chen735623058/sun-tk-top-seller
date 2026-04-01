@@ -1,10 +1,12 @@
 import { ref } from 'vue'
 import { generateWithDoubao, generateWithOpenAI } from '../api/ai'
-import { buildTitlePrompt, parseTitlesFromAI } from '../utils/titleParser'
+import { buildTitlePrompt, parseTitlesFromAI, processStream } from '../utils/titleParser'
 import { keywordsData } from '../data/keywords'
 
 export const useTitleGenerator = () => {
   const loading = ref(false)
+  const streaming = ref(false)
+  const streamProgress = ref(0)
   const matchedKeywords = ref([])
   const generatedTitles = ref([])
 
@@ -154,23 +156,28 @@ export const useTitleGenerator = () => {
   }
 
   /**
-   * Generate titles using AI
+   * Generate titles using AI with streaming support
    * @param {Object} options - Generation options
    * @param {string} options.product - Product name
    * @param {string} options.description - Product description
    * @param {string} options.aiProvider - AI provider (openai/doubao)
    * @param {string} options.openaiApiKey - OpenAI API key
    * @param {string} options.doubaoApiKey - Doubao API key
+   * @param {boolean} options.stream - Whether to use streaming response
    * @returns {Promise<Array<Object>>} Generated titles
    */
   const generateTitles = async (options) => {
-    const { product, description, aiProvider, openaiApiKey, doubaoApiKey } = options
+    const { product, description, aiProvider, openaiApiKey, doubaoApiKey, stream = true } = options
 
     if (!product.trim()) {
       throw new Error('Please enter product name')
     }
 
     loading.value = true
+    streaming.value = stream
+    streamProgress.value = 0
+    generatedTitles.value = []
+
     try {
       // 匹配关键词
       const matched = matchKeywords(product, description)
@@ -182,14 +189,35 @@ export const useTitleGenerator = () => {
         const prompt = buildTitlePrompt(product, description, keywordsData)
 
         try {
-          let response
-          if (aiProvider === 'openai') {
-            response = await generateWithOpenAI(prompt, openaiApiKey)
+          let content
+          if (stream) {
+            // 流式生成
+            let streamResponse
+            if (aiProvider === 'openai') {
+              streamResponse = await generateWithOpenAI(prompt, openaiApiKey, true)
+            } else {
+              streamResponse = await generateWithDoubao(prompt, doubaoApiKey, true)
+            }
+
+            // 处理流
+            content = await processStream(streamResponse, (partialContent) => {
+              // 实时解析部分内容
+              const partialTitles = parseTitlesFromAI(partialContent)
+              generatedTitles.value = partialTitles
+              streamProgress.value = Math.min(partialContent.length / 500, 1) // 估算进度
+            })
           } else {
-            response = await generateWithDoubao(prompt, doubaoApiKey)
+            // 非流式生成
+            let response
+            if (aiProvider === 'openai') {
+              response = await generateWithOpenAI(prompt, openaiApiKey, false)
+            } else {
+              response = await generateWithDoubao(prompt, doubaoApiKey, false)
+            }
+            content = response.choices[0].message.content
           }
 
-          const content = response.choices[0].message.content
+          // 最终解析完整内容
           titles = parseTitlesFromAI(content)
         } catch (error) {
           console.error('AI generation failed, falling back to local:', error)
@@ -204,6 +232,8 @@ export const useTitleGenerator = () => {
       return titles
     } finally {
       loading.value = false
+      streaming.value = false
+      streamProgress.value = 1
     }
   }
 
@@ -224,6 +254,8 @@ export const useTitleGenerator = () => {
 
   return {
     loading,
+    streaming,
+    streamProgress,
     matchedKeywords,
     generatedTitles,
     generateTitles,

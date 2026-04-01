@@ -109,3 +109,78 @@ ${description ? `额外描述：${description}` : ''}
 
 请直接输出5个标题，不要多余内容。`
 }
+
+/**
+ * Parse SSE stream chunk
+ * @param {string} chunk - Raw SSE chunk
+ * @returns {Object|null} Parsed data or null
+ */
+export const parseSSEChunk = (chunk) => {
+  const lines = chunk.split('\n').filter(line => line.trim())
+  for (const line of lines) {
+    if (line.startsWith('data: ')) {
+      const data = line.slice(5).trim()
+      if (data === '[DONE]') {
+        return { done: true }
+      }
+      try {
+        const parsed = JSON.parse(data)
+        return {
+          done: false,
+          content: parsed.choices[0]?.delta?.content || '',
+          reasoning_content: parsed.choices[0]?.delta?.reasoning_content || ''
+        }
+      } catch (e) {
+        console.error('Failed to parse SSE chunk:', e)
+        return null
+      }
+    }
+  }
+  return null
+}
+
+/**
+ * Process streaming response and build full content
+ * @param {ReadableStream} stream - Response body stream
+ * @param {Function} onChunk - Callback for each chunk
+ * @returns {Promise<string>} Full content
+ */
+export const processStream = async (stream, onChunk) => {
+  const reader = stream.getReader()
+  const decoder = new TextDecoder('utf-8')
+  let fullContent = ''
+  let buffer = ''
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+
+    buffer += decoder.decode(value, { stream: true })
+    const chunks = buffer.split('\n\n')
+    buffer = chunks.pop() || ''
+
+    for (const chunk of chunks) {
+      const parsed = parseSSEChunk(chunk)
+      if (parsed && !parsed.done) {
+        fullContent += parsed.content
+        if (onChunk) {
+          onChunk(fullContent)
+        }
+      }
+    }
+  }
+
+  // Process remaining buffer
+  if (buffer) {
+    const parsed = parseSSEChunk(buffer)
+    if (parsed && !parsed.done) {
+      fullContent += parsed.content
+      if (onChunk) {
+        onChunk(fullContent)
+      }
+    }
+  }
+
+  return fullContent
+}
+

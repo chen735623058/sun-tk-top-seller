@@ -44,8 +44,9 @@
       >
       <small style="color: #666;">API Key 保存在你的浏览器本地，不会上传到服务器</small>
     </div>
-    <button @click="handleGenerate" :disabled="loading">
-      {{ loading ? 'Generating...' : '生成优化标题 Generate Titles' }}
+    <button @click="handleGenerate" :disabled="loading" class="generate-btn">
+      <span v-if="loading" class="loading-spinner"></span>
+      {{ loading ? 'AI 正在生成中...' : '生成优化标题 Generate Titles' }}
     </button>
     <button class="btn-secondary" @click="handleClear">清空 Clear</button>
   </div>
@@ -134,6 +135,22 @@ button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
   transform: none;
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s ease-in-out infinite;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
 .btn-secondary {
