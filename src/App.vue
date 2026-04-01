@@ -25,7 +25,17 @@
             placeholder="Add more details about your product, like features, size, material..."
           ></textarea>
         </div>
-        <button @click="generateTitles">生成优化标题 Generate Titles</button>
+        <div class="form-group">
+          <label for="apiKey">OpenAI API Key (Optional, leave empty to use local matching)</label>
+          <input
+            v-model="form.apiKey"
+            type="password"
+            id="apiKey"
+            placeholder="sk-..."
+          >
+          <small style="color: #666;">API Key 保存在你的浏览器本地，不会上传到服务器</small>
+        </div>
+        <button @click="generateTitles" :disabled="loading">{{ loading ? 'Generating...' : '生成优化标题 Generate Titles' }}</button>
         <button class="btn-secondary" @click="clearForm">清空 Clear</button>
       </div>
 
@@ -105,10 +115,12 @@ export default {
   setup() {
     const form = ref({
       product: '',
-      description: ''
+      description: '',
+      apiKey: ''
     })
 
     const keywordsDataRef = ref(keywordsData)
+    const loading = ref(false)
     const newKeyword = ref({
       category: 'cat',
       keyword: ''
@@ -164,7 +176,7 @@ export default {
       return shuffled.slice(0, count)
     }
 
-    const generateMultipleTitles = (product, matchedKeywords, marketingWords) => {
+    const generateLocalTitles = (product, matchedKeywords, marketingWords) => {
       const titles = []
       
       const productClean = product.split(' ').map(word => 
@@ -263,9 +275,112 @@ export default {
       return titles
     }
 
-    const generateTitles = () => {
+    const generateWithAI = async (product, description, matchedKeywords, apiKey) => {
+      // 整理关键词库文本
+      let keywordsText = ''
+      for (const category in keywordsDataRef.value) {
+        const words = keywordsDataRef.value[category].join(', ')
+        keywordsText += `${category.toUpperCase()}: ${words}\n`
+      }
+
+      const prompt = `你是一位 TikTok Shop 美区宠物品类的标题优化专家。
+我会给你我的商品基础信息，请你结合 2026 年最新美区热门搜索关键词，帮我生成 5 个不同风格的商品标题。
+
+### 规则：
+1. 必须尽可能多的包含下面给出的美区热门搜索关键词，提高搜索曝光
+2. 标题长度控制在 60-150 字符（符合TK搜索排名规则），核心关键词前置
+3. 核心大词放前面，长尾词放后面，符合美区消费者搜索习惯
+4. 可以加上热门属性词：like "durable", "easy clean", "non toxic", "premium" 这些转化好的词
+5. 生成5个标题：1个基础标准款，2个长尾精准款，2个吸引点击款（带一点营销感）
+6. 输出格式：每个标题包含类型和标题，例如：
+- [基础标准款] Title here
+
+### 2026 美区宠物热门关键词库：
+${keywordsText}
+
+### 我的商品：
+商品名称：${product}
+${description ? `额外描述：${description}` : ''}
+
+请直接输出5个标题，不要多余内容。`
+
+      try {
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            model: 'gpt-3.5-turbo',
+            messages: [
+              { role: 'user', content: prompt }
+            ],
+            temperature: 0.7
+          })
+        })
+
+        if (!response.ok) {
+          throw new Error('API request failed')
+        }
+
+        const data = await response.json()
+        const content = data.choices[0].message.content
+        
+        // 解析AI输出
+        const lines = content.split('\n').filter(line => line.trim())
+        const titles = []
+        const typeMap = {
+          '基础': '基础标准款',
+          '标准': '基础标准款',
+          '长尾': '长尾精准款',
+          '精准': '长尾精准款',
+          '营销': '营销吸引款',
+          '吸引': '营销吸引款',
+          '点击': '营销吸引款'
+        }
+
+        lines.forEach(line => {
+          let match = line.match(/\[(.*?)\]\s*(.*)/) || line.match(/-\s*\**(.*?):\**\s*(.*)/) || line.match(/-\s*(.*?)\s*-\s*(.*)/)
+          if (match) {
+            let type = match[1].trim()
+            let title = match[2].trim()
+            // 匹配类型别名
+            for (const key in typeMap) {
+              if (type.toLowerCase().includes(key)) {
+                type = typeMap[key]
+                break
+              }
+            }
+            titles.push({
+              type: type,
+              title: title,
+              length: title.length
+            })
+          } else if (line.startsWith('- ')) {
+            // 如果只是 - 开头，推测顺序
+            const order = titles.length + 1
+            let type = order === 1 ? '基础标准款' : 
+                       order <= 3 ? '长尾精准款' : '营销吸引款'
+            titles.push({
+              type: type,
+              title: line.substring(2).trim(),
+              length: line.substring(2).trim().length
+            })
+          }
+        })
+
+        return titles.slice(0, 5)
+      } catch (error) {
+        console.error('AI generation error:', error)
+        throw error
+      }
+    }
+
+    const generateTitles = async () => {
       const product = form.value.product.trim().toLowerCase()
       const description = form.value.description.trim().toLowerCase()
+      const apiKey = form.value.apiKey.trim()
       
       if (!product) {
         showToast('Please enter product name')
@@ -290,11 +405,34 @@ export default {
       }
       
       const marketing = keywordsDataRef.value.marketing || []
-      const titles = generateMultipleTitles(product, matched, marketing)
       
-      result.value = {
-        matchedKeywords: matched,
-        titles: titles
+      // 如果有API Key，使用AI生成
+      if (apiKey) {
+        loading.value = true
+        try {
+          const titles = await generateWithAI(product, description, matched, apiKey)
+          result.value = {
+            matchedKeywords: matched,
+            titles: titles
+          }
+          showToast('AI generation complete!')
+        } catch (error) {
+          showToast('AI generation failed, using local generation instead')
+          const titles = generateLocalTitles(product, matched, marketing)
+          result.value = {
+            matchedKeywords: matched,
+            titles: titles
+          }
+        } finally {
+          loading.value = false
+        }
+      } else {
+        // 没有API Key，使用本地生成
+        const titles = generateLocalTitles(product, matched, marketing)
+        result.value = {
+          matchedKeywords: matched,
+          titles: titles
+        }
       }
     }
 
@@ -458,6 +596,12 @@ button:hover {
 
 button:active {
   transform: translateY(0);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
 }
 
 .btn-secondary {
